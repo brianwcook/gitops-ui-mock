@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VS Code - Konflux Component Wizard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1e1e1e;
+            color: #cccccc;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .vscode-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        .title-bar {
+            background: #323233;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            justify-content: space-between;
+            border-bottom: 1px solid #464647;
+        }
+        
+        .title-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .title-bar-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .title-bar-control {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .close { background: #ff5f57; }
+        .minimize { background: #ffbd2e; }
+        .maximize { background: #28ca42; }
+        
+        .tab-bar {
+            background: #2d2d30;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #464647;
+        }
+        
+        .tab {
+            background: #2d2d30;
+            color: #cccccc;
+            padding: 0 16px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-right: 1px solid #464647;
+            cursor: pointer;
+            font-size: 13px;
+            position: relative;
+        }
+        
+        .tab.active {
+            background: #1e1e1e;
+            color: #ffffff;
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #007acc;
+        }
+        
+        .tab-icon {
+            width: 16px;
+            height: 16px;
+            background: #007acc;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: #252526;
+            border-right: 1px solid #464647;
+            padding: 16px;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+        
+        .sidebar-title {
+            color: #cccccc;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        
+        .file-tree {
+            font-size: 13px;
+        }
+        
+        .file-tree-item {
+            padding: 2px 0;
+            color: #cccccc;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .file-tree-item:hover {
+            background: #2a2d2e;
+        }
+        
+        .file-tree-item.active {
+            background: #094771;
+            color: #ffffff;
+        }
+        
+        .file-icon {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        .plugin-section {
+            background: #1e1e1e;
+            border: 1px solid #464647;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .plugin-title {
+            color: #007acc;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .plugin-status {
+            font-size: 11px;
+            color: #4ec9b0;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: #4ec9b0;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .editor-area {
+            flex: 1;
+            background: #1e1e1e;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        
+        .editor-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #464647;
+            background: #252526;
+        }
+        
+        .editor-title {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .editor-subtitle {
+            color: #cccccc;
+            font-size: 14px;
+        }
+        
+        .progress-bar {
+            height: 3px;
+            background: #464647;
+            margin-top: 12px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #007acc;
+            width: 65%;
+            transition: width 0.3s ease;
+        }
+        
+        .form-container {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+        
+        .form-step {
+            background: #252526;
+            border: 1px solid #464647;
+            border-radius: 6px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .step-number {
+            width: 24px;
+            height: 24px;
+            background: #007acc;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .step-title {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .form-label {
+            display: block;
+            color: #cccccc;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+        
+        .form-label .required {
+            color: #f14c4c;
+            margin-left: 4px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            background: #3c3c3c;
+            border: 1px solid #464647;
+            border-radius: 4px;
+            color: #cccccc;
+            font-size: 13px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #007acc;
+            box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
+        }
+        
+        .form-input.success {
+            border-color: #4ec9b0;
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            background: #3c3c3c;
+            border: 1px solid #464647;
+            border-radius: 4px;
+            color: #cccccc;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        
+        .form-select:focus {
+            outline: none;
+            border-color: #007acc;
+        }
+        
+        .form-help {
+            font-size: 11px;
+            color: #858585;
+            margin-top: 4px;
+        }
+        
+        .validation-message {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+            font-size: 11px;
+        }
+        
+        .validation-message.success {
+            color: #4ec9b0;
+        }
+        
+        .validation-message.error {
+            color: #f14c4c;
+        }
+        
+        .validation-icon {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: bold;
+        }
+        
+        .validation-icon.success {
+            background: #4ec9b0;
+            color: #1e1e1e;
+        }
+        
+        .validation-icon.error {
+            background: #f14c4c;
+            color: white;
+        }
+        
+        .yaml-preview {
+            background: #0e1419;
+            border: 1px solid #464647;
+            border-radius: 6px;
+            padding: 16px;
+            margin-top: 16px;
+            position: relative;
+        }
+        
+        .yaml-preview-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        
+        .yaml-preview-title {
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .yaml-preview-badge {
+            background: #007acc;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 2px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        
+        .yaml-content {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            color: #cccccc;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        
+        .yaml-key {
+            color: #9cdcfe;
+        }
+        
+        .yaml-string {
+            color: #ce9178;
+        }
+        
+        .yaml-value {
+            color: #4ec9b0;
+        }
+        
+        .yaml-comment {
+            color: #6a9955;
+            font-style: italic;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            padding: 24px;
+            border-top: 1px solid #464647;
+            background: #252526;
+            flex-shrink: 0;
+        }
+        
+        .button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .button-primary {
+            background: #007acc;
+            color: white;
+        }
+        
+        .button-primary:hover {
+            background: #005a9e;
+        }
+        
+        .button-secondary {
+            background: #3c3c3c;
+            color: #cccccc;
+            border: 1px solid #464647;
+        }
+        
+        .button-secondary:hover {
+            background: #505050;
+        }
+        
+        .generating-indicator {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #007acc;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .spinner {
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="vscode-container">
+        <div class="title-bar">
+            <div class="title-bar-left">
+                <span style="font-size: 13px; color: #cccccc;">Konflux Component Wizard - Visual Studio Code</span>
+            </div>
+            <div class="title-bar-controls">
+                <div class="title-bar-control minimize"></div>
+                <div class="title-bar-control maximize"></div>
+                <div class="title-bar-control close"></div>
+            </div>
+        </div>
+        
+        <div class="tab-bar">
+            <div class="tab active">
+                <div class="tab-icon">K</div>
+                <span>Component Wizard</span>
+            </div>
+            <div class="tab">
+                <div class="file-icon">📄</div>
+                <span>konflux-config.yaml</span>
+            </div>
+            <div class="tab">
+                <div class="file-icon">📖</div>
+                <span>README.md</span>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Explorer</div>
+                    <div class="file-tree">
+                        <div class="file-tree-item">
+                            <div class="file-icon">📁</div>
+                            <span>my-team-config</span>
+                        </div>
+                        <div class="file-tree-item" style="padding-left: 20px;">
+                            <div class="file-icon">📄</div>
+                            <span>konflux-config.yaml</span>
+                        </div>
+                        <div class="file-tree-item active" style="padding-left: 20px;">
+                            <div class="file-icon">⚙️</div>
+                            <span>component.yaml</span>
+                        </div>
+                        <div class="file-tree-item" style="padding-left: 20px;">
+                            <div class="file-icon">📖</div>
+                            <span>README.md</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Konflux</div>
+                    <div class="plugin-section">
+                        <div class="plugin-title">GitOps Plugin</div>
+                        <div class="plugin-status">
+                            <div class="status-dot"></div>
+                            <span>Connected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="editor-area">
+                <div class="editor-header">
+                    <div class="editor-title">Configure Component</div>
+                    <div class="editor-subtitle">Create a new component for your application</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                </div>
+                
+                <div class="form-container">
+                    <div class="form-step">
+                        <div class="step-header">
+                            <div class="step-number">1</div>
+                            <div class="step-title">Component Details</div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Component Name
+                                    <span class="required">*</span>
+                                </label>
+                                <input type="text" class="form-input success" value="bazel-builder" />
+                                <div class="validation-message success">
+                                    <div class="validation-icon success">✓</div>
+                                    <span>Valid component name</span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Namespace
+                                    <span class="required">*</span>
+                                </label>
+                                <input type="text" class="form-input" value="my-team-production" readonly style="background: #2d2d30;" />
+                                <div class="form-help">Automatically set from your GitOps repository</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-step">
+                        <div class="step-header">
+                            <div class="step-number">2</div>
+                            <div class="step-title">Source Configuration</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                Git Repository URL
+                                <span class="required">*</span>
+                            </label>
+                            <input type="text" class="form-input success" value="https://github.com/konflux-ci/testrepo.git" />
+                            <div class="validation-message success">
+                                <div class="validation-icon success">✓</div>
+                                <span>Repository accessible</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Git Revision</label>
+                                <input type="text" class="form-input" value="main" />
+                                <div class="form-help">Branch, tag, or commit SHA</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Context Directory</label>
+                                <input type="text" class="form-input" value="./" />
+                                <div class="form-help">Root directory for the build</div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Dockerfile Path</label>
+                            <input type="text" class="form-input" value="Containerfile" />
+                            <div class="form-help">Path to Dockerfile or Containerfile</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-step">
+                        <div class="step-header">
+                            <div class="step-number">3</div>
+                            <div class="step-title">Build Configuration</div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Pipeline
+                                    <span class="required">*</span>
+                                </label>
+                                <select class="form-select">
+                                    <option selected>docker-build-oci-ta</option>
+                                    <option>nodejs-build</option>
+                                    <option>maven-build</option>
+                                    <option>go-build</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Git Provider</label>
+                                <select class="form-select">
+                                    <option>github</option>
+                                    <option selected>gitlab</option>
+                                    <option>bitbucket</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Git Provider URL</label>
+                            <input type="text" class="form-input" value="https://gitlab.com" />
+                            <div class="form-help">Base URL for your Git provider</div>
+                        </div>
+                    </div>
+                    
+                    <div class="yaml-preview">
+                        <div class="generating-indicator">
+                            <div class="spinner"></div>
+                            <span>Generating YAML...</span>
+                        </div>
+                        <div class="yaml-preview-header">
+                            <div class="yaml-preview-title">
+                                <span>📄 Component YAML Preview</span>
+                                <div class="yaml-preview-badge">Live</div>
+                            </div>
+                        </div>
+                        <div class="yaml-content"><span class="yaml-key">apiVersion:</span> <span class="yaml-string">appstudio.redhat.com/v1alpha1</span>
+<span class="yaml-key">kind:</span> <span class="yaml-value">Component</span>
+<span class="yaml-key">metadata:</span>
+&nbsp;&nbsp;<span class="yaml-key">name:</span> <span class="yaml-string">bazel-builder</span>
+&nbsp;&nbsp;<span class="yaml-key">namespace:</span> <span class="yaml-string">my-team-production</span>
+&nbsp;&nbsp;<span class="yaml-key">annotations:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="yaml-key">build.appstudio.openshift.io/request:</span> <span class="yaml-string">configure-pac</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="yaml-key">build.appstudio.openshift.io/pipeline:</span> <span class="yaml-string">'{"name":"docker-build-oci-ta","bundle":"latest"}'</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="yaml-key">git-provider:</span> <span class="yaml-string">gitlab</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="yaml-key">git-provider-url:</span> <span class="yaml-string">https://gitlab.com</span>
+<span class="yaml-key">spec:</span>
+&nbsp;&nbsp;<span class="yaml-key">componentName:</span> <span class="yaml-string">bazel-builder</span>
+&nbsp;&nbsp;<span class="yaml-key">source:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="yaml-key">git:</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yaml-key">url:</span> <span class="yaml-string">https://github.com/konflux-ci/testrepo.git</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yaml-key">revision:</span> <span class="yaml-string">main</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yaml-key">context:</span> <span class="yaml-string">./</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yaml-key">dockerfileUrl:</span> <span class="yaml-string">Containerfile</span></div>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button class="button button-secondary">
+                        <span>❌</span>
+                        <span>Cancel</span>
+                    </button>
+                    <button class="button button-secondary">
+                        <span>👀</span>
+                        <span>Preview Changes</span>
+                    </button>
+                    <button class="button button-primary">
+                        <span>💾</span>
+                        <span>Generate & Commit</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

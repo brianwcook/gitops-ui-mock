@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konflux - Register GitOps Repository</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            height: 100vh;
+            display: flex;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: #1a202c;
+            color: white;
+            padding: 0;
+            flex-shrink: 0;
+        }
+        
+        .sidebar-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .sidebar-header .logo {
+            width: 32px;
+            height: 32px;
+            background: #3182ce;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .sidebar-header .brand {
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .sidebar-nav {
+            padding: 8px 0;
+        }
+        
+        .sidebar-nav ul {
+            list-style: none;
+        }
+        
+        .sidebar-nav li {
+            padding: 12px 24px;
+            color: #cbd5e0;
+            font-size: 14px;
+            border-bottom: 1px solid #2d3748;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .sidebar-nav li:hover {
+            background: #2d3748;
+        }
+        
+        .sidebar-nav li.active {
+            background: #2d3748;
+            color: #63b3ed;
+            font-weight: 500;
+        }
+        
+        .main-content {
+            flex: 1;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            padding: 16px 0;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8f9fa;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+        
+        .namespace-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #4a5568;
+        }
+        
+        .namespace-selector select {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            background: white;
+            font-size: 14px;
+            color: #2d3748;
+        }
+        
+        .content {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px;
+            width: 100%;
+        }
+        
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: #3182ce;
+        }
+        
+        .breadcrumb a {
+            color: #3182ce;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .breadcrumb .separator {
+            color: #a0aec0;
+        }
+        
+        .page-header {
+            margin-bottom: 32px;
+        }
+        
+        .page-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+        
+        .page-description {
+            font-size: 16px;
+            color: #4a5568;
+            line-height: 1.5;
+        }
+        
+        .form-section {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #2d3748;
+            margin-bottom: 6px;
+        }
+        
+        .form-group label .required {
+            color: #e53e3e;
+            margin-left: 4px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #2d3748;
+            background: white;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #3182ce;
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+        }
+        
+        .form-group input.error {
+            border-color: #e53e3e;
+        }
+        
+        .form-group input.success {
+            border-color: #38a169;
+        }
+        
+        .form-group .help-text {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 4px;
+        }
+        
+        .validation-message {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+            font-size: 12px;
+        }
+        
+        .validation-message.error {
+            color: #e53e3e;
+        }
+        
+        .validation-message.success {
+            color: #38a169;
+        }
+        
+        .validation-message.warning {
+            color: #d69e2e;
+        }
+        
+        .validation-icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .validation-icon.error {
+            background: #e53e3e;
+            color: white;
+        }
+        
+        .validation-icon.success {
+            background: #38a169;
+            color: white;
+        }
+        
+        .validation-icon.warning {
+            background: #d69e2e;
+            color: white;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin-top: 2px;
+            accent-color: #3182ce;
+        }
+        
+        .checkbox-group label {
+            font-size: 14px;
+            color: #2d3748;
+            margin-bottom: 0;
+        }
+        
+        .conditional-section {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 20px;
+            margin-top: 16px;
+        }
+        
+        .conditional-section h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 16px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 12px;
+            padding-top: 24px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .button {
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .button-primary {
+            background: #3182ce;
+            color: white;
+        }
+        
+        .button-primary:hover {
+            background: #2c5aa0;
+        }
+        
+        .button-primary:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+        }
+        
+        .button-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .button-secondary:hover {
+            background: #cbd5e0;
+        }
+        
+        .button-outline {
+            background: white;
+            color: #3182ce;
+            border: 1px solid #3182ce;
+        }
+        
+        .button-outline:hover {
+            background: #ebf8ff;
+        }
+        
+        .info-banner {
+            background: #ebf8ff;
+            border: 1px solid #90cdf4;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .info-banner .icon {
+            width: 20px;
+            height: 20px;
+            background: #3182ce;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .info-banner .content {
+            flex: 1;
+        }
+        
+        .info-banner h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 4px;
+        }
+        
+        .info-banner p {
+            font-size: 13px;
+            color: #2d3748;
+            line-height: 1.4;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">K</div>
+            <div class="brand">KONFLUX</div>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li>Overview</li>
+                <li>Namespaces</li>
+                <li>Applications</li>
+                <li>Secrets</li>
+                <li>Releases</li>
+                <li>User Access</li>
+                <li class="active">GitOps</li>
+            </ul>
+        </nav>
+    </div>
+    
+    <div class="main-content">
+        <div class="header">
+            <div class="header-content">
+                <div class="namespace-selector">
+                    <span>Namespace:</span>
+                    <select>
+                        <option>Select or create new namespace</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="breadcrumb">
+                <a href="#">GitOps</a>
+                <span class="separator">›</span>
+                <span>Register Repository</span>
+            </div>
+            
+            <div class="page-header">
+                <h1 class="page-title">Register GitOps Repository</h1>
+                <p class="page-description">
+                    Connect your GitOps repository to Konflux. This will create a dedicated namespace and configure 
+                    continuous deployment for your team's applications and components.
+                </p>
+            </div>
+            
+            <div class="info-banner">
+                <div class="icon">i</div>
+                <div class="content">
+                    <h4>One-time setup</h4>
+                    <p>This registration process creates a 1:1 mapping between your GitOps repository and a Kubernetes namespace. Once registered, all resources from your repository will be deployed to the designated namespace.</p>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <form>
+                    <div class="form-group">
+                        <label>
+                            Git Repository URL
+                            <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            placeholder="https://github.com/your-org/your-gitops-repo" 
+                            value="https://github.com/my-team/app-config"
+                        >
+                        <div class="help-text">
+                            The URL of your GitOps repository containing Konflux configuration files
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            Namespace Name
+                            <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            placeholder="my-team-production" 
+                            value="my-team-production"
+                            class="success"
+                        >
+                        <div class="validation-message success">
+                            <div class="validation-icon success">✓</div>
+                            <span>Namespace name is available and meets requirements</span>
+                        </div>
+                        <div class="help-text">
+                            Must be 3-63 characters, lowercase letters, numbers, and hyphens only. Cannot be changed after registration.
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="private-repo" checked>
+                        <label for="private-repo">
+                            This is a private repository that requires authentication
+                        </label>
+                    </div>
+                    
+                    <div class="conditional-section">
+                        <h4>Git Authentication</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>
+                                    Secret Name
+                                    <span class="required">*</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    placeholder="my-team-git-secret" 
+                                    value="my-team-git-secret"
+                                >
+                                <div class="help-text">
+                                    Name for the Git authentication secret
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>
+                                    Authentication Type
+                                    <span class="required">*</span>
+                                </label>
+                                <select style="width: 100%; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; color: #2d3748; background: white;">
+                                    <option>Personal Access Token</option>
+                                    <option>SSH Key</option>
+                                    <option>OAuth Token</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>
+                                Personal Access Token
+                                <span class="required">*</span>
+                            </label>
+                            <input 
+                                type="password" 
+                                placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                            >
+                            <div class="help-text">
+                                GitHub Personal Access Token with repository read access
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button type="submit" class="button button-primary">
+                            Register Repository
+                        </button>
+                        <button type="button" class="button button-outline">
+                            Test Connection
+                        </button>
+                        <button type="button" class="button button-secondary">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

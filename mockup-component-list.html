@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konflux - bazel-builder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            height: 100vh;
+            display: flex;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: #1a202c;
+            color: white;
+            padding: 0;
+            flex-shrink: 0;
+        }
+        
+        .sidebar-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .sidebar-header .logo {
+            width: 32px;
+            height: 32px;
+            background: #3182ce;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .sidebar-header .brand {
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .sidebar-nav {
+            padding: 8px 0;
+        }
+        
+        .sidebar-nav ul {
+            list-style: none;
+        }
+        
+        .sidebar-nav li {
+            padding: 12px 24px;
+            color: #cbd5e0;
+            font-size: 14px;
+            border-bottom: 1px solid #2d3748;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .sidebar-nav li:hover {
+            background: #2d3748;
+        }
+        
+        .sidebar-nav li.active {
+            background: #2d3748;
+            color: #63b3ed;
+            font-weight: 500;
+        }
+        
+        .main-content {
+            flex: 1;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            padding: 16px 0;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8f9fa;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .namespace-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #4a5568;
+        }
+        
+        .namespace-selector select {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            background: white;
+            font-size: 14px;
+            color: #2d3748;
+        }
+        
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            background: #c6f6d5;
+            color: #22543d;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-badge .dot {
+            width: 8px;
+            height: 8px;
+            background: #38a169;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #4a5568;
+            font-size: 14px;
+        }
+        
+        .content {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px;
+            width: 100%;
+        }
+        
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: #3182ce;
+        }
+        
+        .breadcrumb a {
+            color: #3182ce;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .breadcrumb .separator {
+            color: #a0aec0;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+        
+        .page-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1a202c;
+        }
+        
+        .page-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .button {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        
+        .button-primary {
+            background: #e97749;
+            color: white;
+        }
+        
+        .button-primary:hover {
+            background: #d63e04;
+        }
+        
+        .tab-nav {
+            display: flex;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 32px;
+        }
+        
+        .tab-nav a {
+            padding: 12px 16px;
+            color: #4a5568;
+            text-decoration: none;
+            border-bottom: 2px solid transparent;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .tab-nav a.active {
+            color: #3182ce;
+            border-bottom-color: #3182ce;
+        }
+        
+        .tab-nav a:hover {
+            color: #2d3748;
+        }
+        
+        .section-header {
+            margin-bottom: 24px;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+        
+        .section-description {
+            font-size: 14px;
+            color: #4a5568;
+            line-height: 1.5;
+        }
+        
+        .info-banner {
+            background: #fef5e7;
+            border: 1px solid #f6e05e;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .info-banner .icon {
+            width: 20px;
+            height: 20px;
+            background: #ed8936;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .info-banner .content {
+            flex: 1;
+        }
+        
+        .info-banner h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 4px;
+        }
+        
+        .info-banner p {
+            font-size: 13px;
+            color: #2d3748;
+            line-height: 1.4;
+        }
+        
+        .info-banner .action {
+            background: white;
+            color: #3182ce;
+            border: 1px solid #3182ce;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 12px;
+            margin-top: 8px;
+            display: inline-block;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            gap: 16px;
+        }
+        
+        .controls-left {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .search-input {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 300px;
+        }
+        
+        .filter-dropdown {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            background: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .table-container {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table th {
+            background: #f7fafc;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #4a5568;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .table td {
+            padding: 16px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+            vertical-align: top;
+        }
+        
+        .table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .table tr:hover {
+            background: #f7fafc;
+        }
+        
+        .component-name {
+            font-weight: 600;
+            color: #3182ce;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .component-name:hover {
+            text-decoration: underline;
+        }
+        
+        .repo-link {
+            color: #4a5568;
+            text-decoration: none;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 4px;
+        }
+        
+        .repo-link:hover {
+            color: #3182ce;
+        }
+        
+        .quay-link {
+            color: #3182ce;
+            text-decoration: none;
+            font-size: 13px;
+            word-break: break-all;
+        }
+        
+        .quay-link:hover {
+            text-decoration: underline;
+        }
+        
+        .build-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+        
+        .build-status.completed {
+            color: #22543d;
+        }
+        
+        .build-status.in-progress {
+            color: #d69e2e;
+        }
+        
+        .build-status.failed {
+            color: #c53030;
+        }
+        
+        .build-status .icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .build-status.completed .icon {
+            background: #38a169;
+            color: white;
+        }
+        
+        .build-status.in-progress .icon {
+            background: #d69e2e;
+            color: white;
+            animation: spin 1s linear infinite;
+        }
+        
+        .build-status.failed .icon {
+            background: #e53e3e;
+            color: white;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .build-details {
+            margin-top: 4px;
+            font-size: 12px;
+            color: #718096;
+        }
+        
+        .actions-cell {
+            text-align: right;
+        }
+        
+        .action-button {
+            color: #3182ce;
+            text-decoration: none;
+            font-size: 13px;
+            padding: 4px 8px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            margin-right: 8px;
+        }
+        
+        .action-button:hover {
+            background: #ebf8ff;
+            border-color: #3182ce;
+        }
+        
+        .menu-button {
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            color: #4a5568;
+        }
+        
+        .menu-button:hover {
+            color: #2d3748;
+        }
+        
+        .new-component-highlight {
+            background: #f0fff4 !important;
+            border-left: 4px solid #38a169;
+        }
+        
+        .new-component-highlight:hover {
+            background: #e6fffa !important;
+        }
+        
+        .new-badge {
+            background: #38a169;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">K</div>
+            <div class="brand">KONFLUX</div>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li>Overview</li>
+                <li>Namespaces</li>
+                <li class="active">Applications</li>
+                <li>Secrets</li>
+                <li>Releases</li>
+                <li>User Access</li>
+            </ul>
+        </nav>
+    </div>
+    
+    <div class="main-content">
+        <div class="header">
+            <div class="header-content">
+                <div class="namespace-selector">
+                    <span>Namespace:</span>
+                    <select>
+                        <option>my-team-production</option>
+                    </select>
+                </div>
+                <div class="header-actions">
+                    <div class="status-badge">
+                        <div class="dot"></div>
+                        <span>GitOps Sync Active</span>
+                    </div>
+                    <div class="user-menu">
+                        <span>🔔</span>
+                        <span>bcook ▼</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="breadcrumb">
+                <a href="#">Applications</a>
+                <span class="separator">›</span>
+                <span>bazel-builder</span>
+            </div>
+            
+            <div class="page-header">
+                <h1 class="page-title">bazel-builder</h1>
+                <div class="page-actions">
+                    <button class="button button-primary">
+                        Actions ▼
+                    </button>
+                </div>
+            </div>
+            
+            <div class="tab-nav">
+                <a href="#" class="active">Overview</a>
+                <a href="#">Activity</a>
+                <a href="#">Components</a>
+                <a href="#">Integration tests</a>
+                <a href="#">Releases</a>
+            </div>
+            
+            <div class="section-header">
+                <h2 class="section-title">Components</h2>
+                <p class="section-description">
+                    A component is an image built from source code in a repository. One or more components that run together form an application.
+                </p>
+            </div>
+            
+
+            
+            <div class="controls">
+                <div class="controls-left">
+                    <input type="text" class="search-input" placeholder="🔍 Filter by name...">
+                    <select class="filter-dropdown">
+                        <option>⚙️ Status</option>
+                        <option>All</option>
+                        <option>Building</option>
+                        <option>Completed</option>
+                        <option>Failed</option>
+                    </select>
+                </div>
+                <button class="button button-primary">Add component</button>
+            </div>
+            
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Latest build</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="new-component-highlight">
+                            <td>
+                                <a href="#" class="component-name">
+                                    bazel-builder
+                                    <span class="new-badge">NEW</span>
+                                </a>
+                                <a href="#" class="repo-link">
+                                    📁 konflux-ci/testrepo (bazel-builder)
+                                </a>
+                                <a href="#" class="quay-link">
+                                    quay.io/my-team-production/bazel-builder@sha256:pending...
+                                </a>
+                            </td>
+                            <td>
+                                <div class="build-status in-progress">
+                                    <div class="icon">⚡</div>
+                                    <span>Build in progress</span>
+                                </div>
+                                <div class="build-details">
+                                    Started just now • docker-build-oci-ta pipeline
+                                </div>
+                            </td>
+                            <td class="actions-cell">
+                                <a href="#" class="action-button">View build logs</a>
+                                <button class="menu-button">⋮</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

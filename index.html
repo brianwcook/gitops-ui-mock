@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konflux GitOps Onboarding Redesign - Mockups</title>
+    <link rel="stylesheet" href="https://unpkg.com/reveal.js@4.3.1/dist/reveal.css">
+    <link rel="stylesheet" href="https://unpkg.com/reveal.js@4.3.1/dist/theme/white.css">
+    <style>
+        .reveal {
+            transform: scale(0.8);
+            transform-origin: center center;
+        }
+        
+        .reveal .slides section {
+            text-align: center;
+        }
+        
+        .title-slide {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            border-radius: 20px;
+            margin: 40px;
+        }
+        
+        .title-slide h1 {
+            font-size: 3.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .title-slide h2 {
+            font-size: 1.8em;
+            margin-bottom: 40px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .title-slide .subtitle {
+            font-size: 1.2em;
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+        
+        .title-slide .meta {
+            font-size: 1em;
+            opacity: 0.7;
+            margin-top: 40px;
+        }
+        
+        .mockup-slide {
+            padding: 0 !important;
+            height: 100vh !important;
+        }
+        
+        .mockup-slide iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .reveal .controls {
+            color: #667eea;
+        }
+        
+        .reveal .progress {
+            color: #667eea;
+        }
+        
+        .slide-title {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.95);
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- Title Slide -->
+            <section>
+                <div class="title-slide">
+                    <h1>Konflux GitOps Onboarding</h1>
+                    <h2>Redesign Mockups</h2>
+                    <div class="subtitle">
+                        ADR #047: Unified Git-centric Experience
+                    </div>
+                    <div class="meta">
+                        Mockup Walkthrough • 2024
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Repository Registration -->
+            <section>
+                <div class="slide-title">1. Repository Registration Service</div>
+                <div class="mockup-slide">
+                    <iframe src="mockup-repo-registration.html"></iframe>
+                </div>
+            </section>
+            
+            <!-- Empty State -->
+            <section>
+                <div class="slide-title">2. Post-Registration Empty State</div>
+                <div class="mockup-slide">
+                    <iframe src="mockup-empty-state.html"></iframe>
+                </div>
+            </section>
+            
+            <!-- VS Code Form -->
+            <section>
+                <div class="slide-title">3. VS Code Plugin - Component Configuration</div>
+                <div class="mockup-slide">
+                    <iframe src="mockup-vscode-form.html"></iframe>
+                </div>
+            </section>
+            
+            <!-- VS Code YAML -->
+            <section>
+                <div class="slide-title">4. VS Code Plugin - Generated YAML</div>
+                <div class="mockup-slide">
+                    <iframe src="mockup-vscode-yaml.html"></iframe>
+                </div>
+            </section>
+            
+            <!-- Component List -->
+            <section>
+                <div class="slide-title">5. Konflux UI - Component Building</div>
+                <div class="mockup-slide">
+                    <iframe src="mockup-component-list.html"></iframe>
+                </div>
+            </section>
+        </div>
+    </div>
+    
+    <script src="https://unpkg.com/reveal.js@4.3.1/dist/reveal.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            controls: true,
+            progress: true,
+            center: true,
+            transition: 'slide'
+        });
+    </script>
+</body>
+</html> 

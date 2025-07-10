@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VS Code - Git Commit & Push</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .vscode-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: #1e1e1e;
+        }
+        
+        .title-bar {
+            background: #323233;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            color: #cccccc;
+            border-bottom: 1px solid #464647;
+        }
+        
+        .menu-bar {
+            background: #2d2d30;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            font-size: 13px;
+            color: #cccccc;
+            border-bottom: 1px solid #464647;
+        }
+        
+        .menu-item {
+            padding: 4px 8px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        
+        .menu-item:hover {
+            background: #464647;
+        }
+        
+        .tabs-container {
+            background: #2d2d30;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #464647;
+            padding: 0 8px;
+        }
+        
+        .tab {
+            background: #2d2d30;
+            color: #969696;
+            padding: 8px 16px;
+            border-radius: 4px 4px 0 0;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-right: 2px;
+            border: 1px solid transparent;
+        }
+        
+        .tab.active {
+            background: #1e1e1e;
+            color: #ffffff;
+            border-bottom: 1px solid #1e1e1e;
+        }
+        
+        .tab .close {
+            margin-left: 4px;
+            color: #969696;
+        }
+        
+        .tab .close:hover {
+            color: #ffffff;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: #252526;
+            border-right: 1px solid #464647;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        
+        .sidebar-section {
+            padding: 8px 16px;
+            border-bottom: 1px solid #464647;
+        }
+        
+        .sidebar-title {
+            font-size: 11px;
+            color: #cccccc;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        
+        .file-tree {
+            font-size: 13px;
+        }
+        
+        .file-tree-item {
+            padding: 2px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .file-tree-item:hover {
+            background: #2a2d2e;
+        }
+        
+        .file-tree-item.modified {
+            color: #f9c74f;
+        }
+        
+        .file-tree-item.new {
+            color: #90ee90;
+        }
+        
+        .git-section {
+            padding: 16px;
+            background: #252526;
+        }
+        
+        .git-status {
+            margin-bottom: 16px;
+        }
+        
+        .git-status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-bottom: 4px;
+            background: #2d2d30;
+        }
+        
+        .git-status-item.added {
+            border-left: 3px solid #90ee90;
+        }
+        
+        .git-status-item.modified {
+            border-left: 3px solid #f9c74f;
+        }
+        
+        .git-icon {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            border-radius: 2px;
+        }
+        
+        .git-icon.added {
+            background: #90ee90;
+            color: #1e1e1e;
+        }
+        
+        .git-icon.modified {
+            background: #f9c74f;
+            color: #1e1e1e;
+        }
+        
+        .commit-input {
+            width: 100%;
+            background: #3c3c3c;
+            border: 1px solid #464647;
+            border-radius: 4px;
+            padding: 8px;
+            color: #d4d4d4;
+            font-size: 13px;
+            margin-bottom: 12px;
+            resize: vertical;
+            min-height: 60px;
+        }
+        
+        .commit-input:focus {
+            outline: none;
+            border-color: #007acc;
+        }
+        
+        .git-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .git-button {
+            background: #0e639c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-weight: 500;
+        }
+        
+        .git-button:hover {
+            background: #1177bb;
+        }
+        
+        .git-button.secondary {
+            background: #454545;
+            color: #d4d4d4;
+        }
+        
+        .git-button.secondary:hover {
+            background: #535353;
+        }
+        
+        .git-button.success {
+            background: #22543d;
+            color: #90ee90;
+        }
+        
+        .git-button.success:hover {
+            background: #2d5a3d;
+        }
+        
+        .editor-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #1e1e1e;
+        }
+        
+        .editor-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .success-message {
+            background: #1e3a26;
+            border: 1px solid #22543d;
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            max-width: 500px;
+            margin: 20px;
+        }
+        
+        .success-icon {
+            font-size: 48px;
+            color: #90ee90;
+            margin-bottom: 16px;
+        }
+        
+        .success-title {
+            font-size: 20px;
+            color: #90ee90;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        
+        .success-message p {
+            color: #d4d4d4;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .commit-details {
+            background: #2d2d30;
+            padding: 16px;
+            border-radius: 6px;
+            margin-top: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        
+        .commit-hash {
+            color: #007acc;
+            font-weight: bold;
+        }
+        
+        .branch-info {
+            color: #f9c74f;
+        }
+        
+        .file-changes {
+            color: #90ee90;
+        }
+        
+        .next-steps {
+            background: #2d2d30;
+            padding: 16px;
+            border-radius: 6px;
+            margin-top: 16px;
+            border-left: 4px solid #007acc;
+        }
+        
+        .next-steps h4 {
+            color: #007acc;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .next-steps p {
+            font-size: 13px;
+            color: #d4d4d4;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #464647;
+            border-top: 2px solid #007acc;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .push-status {
+            background: #2d2d30;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #90ee90;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="vscode-container">
+        <div class="title-bar">
+            Component.yaml - gitops-ui-mock - Visual Studio Code
+        </div>
+        
+        <div class="menu-bar">
+            <div class="menu-item">File</div>
+            <div class="menu-item">Edit</div>
+            <div class="menu-item">View</div>
+            <div class="menu-item">Go</div>
+            <div class="menu-item">Run</div>
+            <div class="menu-item">Terminal</div>
+            <div class="menu-item">Help</div>
+        </div>
+        
+        <div class="tabs-container">
+            <div class="tab">
+                <span>📄</span>
+                <span>Component.yaml</span>
+                <span class="close">×</span>
+            </div>
+            <div class="tab active">
+                <span>🔗</span>
+                <span>Source Control</span>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Explorer</div>
+                    <div class="file-tree">
+                        <div class="file-tree-item">
+                            <span>📁</span>
+                            <span>konflux-config</span>
+                        </div>
+                        <div class="file-tree-item new" style="margin-left: 16px;">
+                            <span>📄</span>
+                            <span>Component.yaml</span>
+                        </div>
+                        <div class="file-tree-item modified" style="margin-left: 16px;">
+                            <span>📄</span>
+                            <span>kustomization.yaml</span>
+                        </div>
+                        <div class="file-tree-item">
+                            <span>📄</span>
+                            <span>README.md</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="git-section">
+                    <div class="sidebar-title">Source Control</div>
+                    
+                    <div class="git-status">
+                        <div class="git-status-item added">
+                            <div class="git-icon added">A</div>
+                            <span>konflux-config/Component.yaml</span>
+                        </div>
+                        <div class="git-status-item modified">
+                            <div class="git-icon modified">M</div>
+                            <span>konflux-config/kustomization.yaml</span>
+                        </div>
+                    </div>
+                    
+                    <textarea class="commit-input" placeholder="Add component: bazel-builder
+
+Generated component configuration for bazel-builder:
+- Container image: konflux-ci/testrepo
+- Build pipeline: docker-build-oci-ta
+- Target port: 8080
+
+Co-authored-by: Konflux GitOps Plugin"></textarea>
+                    
+                    <div class="git-actions">
+                        <button class="git-button success">
+                            <span>✓</span>
+                            <span>Commit & Push</span>
+                        </button>
+                        <button class="git-button secondary">
+                            <span>Stage Changes</span>
+                        </button>
+                    </div>
+                    
+                    <div class="push-status">
+                        <div class="spinner"></div>
+                        <span>Pushing to origin/main...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="editor-area">
+                <div class="editor-content">
+                    <div class="success-message">
+                        <div class="success-icon">🚀</div>
+                        <div class="success-title">Changes Committed & Pushed!</div>
+                        <p>Your new component configuration has been successfully committed to Git.</p>
+                        <p>Konflux will automatically detect these changes and start building your component.</p>
+                        
+                        <div class="commit-details">
+                            <div><span class="commit-hash">commit a1b2c3d</span> (HEAD -> <span class="branch-info">main</span>, origin/main)</div>
+                            <div>Add component: bazel-builder</div>
+                            <div style="margin-top: 8px;">
+                                <span class="file-changes">2 files changed, 47 insertions(+)</span><br>
+                                <span class="file-changes">create mode 100644 konflux-config/Component.yaml</span><br>
+                                <span class="file-changes">modified konflux-config/kustomization.yaml</span>
+                            </div>
+                        </div>
+                        
+                        <div class="next-steps">
+                            <h4>🎯 What's Next?</h4>
+                            <p>Switch to Konflux UI to monitor your component's build progress and deployment status.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

@@ -153,14 +153,19 @@
         .mockup-slide {
             padding: 0 !important;
             height: 100vh !important;
+            display: flex;
+            flex-direction: column;
         }
         
         .mockup-slide iframe {
             width: 100%;
-            height: 100%;
+            height: calc(100vh - 60px);
             border: none;
             border-radius: 8px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transform: scale(0.9);
+            transform-origin: top center;
+            margin-top: 60px;
         }
         
         .reveal .controls {
@@ -277,7 +282,12 @@
             controls: true,
             progress: true,
             center: true,
-            transition: 'slide'
+            transition: 'slide',
+            width: 1200,
+            height: 900,
+            margin: 0.1,
+            minScale: 0.2,
+            maxScale: 1.5
         });
     </script>
 </body>
